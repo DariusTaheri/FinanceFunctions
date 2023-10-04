@@ -1,8 +1,7 @@
-
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt 
-from statsmodels.tsa.stattools import coint, adfuller
+from statsmodels.tsa.stattools import coint, adfuller, kpss
 import numpy as np    
 import warnings
 
@@ -49,10 +48,25 @@ def stationarity_test(data, cutoff):
 # We must observe significant p-value to convince ourselves that the series is stationary
     pvalue = adfuller(data)[1]
     if pvalue < cutoff:
-        print(f'p-value = {pvalue}. The series {data.name} is likely stationary.')
+        print(f'ADF p-value = {pvalue}. {data.name} is likely stationary.')
+        return True
     else:
-        print(f'p-value = {pvalue}. The series {data.name} is likely NON-stationary.')
-        
+        print(f'ADF p-value = {pvalue}. {data.name} is likely NON-stationary.')
+        return False
+
+
+# =============================================================================
+# Trend Stationarity Function
+# =============================================================================
+def trend_stationarity_test(timeseries,cutoff):
+    kpsstest = kpss(timeseries, regression='ct')
+    kpss_pvalue = kpsstest[1]
+    if kpss_pvalue < cutoff:
+        print(f'KPSS p-value = {kpss_pvalue}. {timeseries.name} is likely NOT TREND stationary.')
+        return False
+    else:
+        print(f'KPSS p-value = {kpss_pvalue}. {timeseries.name} is likely TREND stationary.')
+        return True
 
 # =============================================================================
 # Cointegration Function
